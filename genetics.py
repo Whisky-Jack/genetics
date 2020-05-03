@@ -17,9 +17,10 @@ class GeneticFit():
         model = NeuralNet(individual)
         train(model, self.trainloader)
         
-        fitness = computePerfomance(model, self.Xvalid)
+        fitness = computePerformance(model, self.validationloader)
 
         self.seen += 1
+        
         if (self.seen == self.pop_size):
             self.gens += 1
             print("Generation ", self.gens, " complete")
@@ -61,7 +62,7 @@ class GeneticFit():
         return child_1, child_2
     
     def geneticFit(self):
-        data = self.X
+        data = self.trainloader
         ga = pyeasyga.GeneticAlgorithm(data,
                                population_size=self.pop_size,
                                generations=self.num_generations,
