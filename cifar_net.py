@@ -14,7 +14,7 @@ import numpy as np
 # DEFAULT CONSTRUCTOR
 class DefaultNet(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super(self).__init__()
         self.conv1 = nn.Conv2d(3, 20, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(20, 30, 5)
@@ -32,23 +32,32 @@ class DefaultNet(nn.Module):
         return x
 
 # CUSTOM CONSTRUCTOR
-class NeuralNet(nn.Module, layers):
-    def __init__(self):
-        super(Net, self).__init__()
+class NeuralNet(nn.Module):
+    def __init__(self, layers):
+        super(self).__init__()
         self.conv1 = nn.Conv2d(3, 20, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(20, 30, 5)
-        self.fc1 = nn.Linear(30 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+
+        # initialize layers from input
+        layers.insert(0, 30 * 5 * 5)
+        layers.insert(len(layers), 10)
+
+        fcs = []
+        for i in range(len(layers) - 1):
+            fcs.append(nn.Linear(layers[i], layers[i + 1]))
+        
+        self.fcs = fcs
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 30 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        for i in range(len(self.fcs) - 1):
+            fc = self.fcs[i]
+            x = F.relu(fc(x))
+        final_layer = self.fcs[-1]
+        x = final_layer(x)
         return x
 
 #######################################
