@@ -1,13 +1,12 @@
 from pyeasyga import pyeasyga
 import numpy as np
 import random
-from neural_net import NeuralNet
+from cifar_net import NeuralNet, train, computePerformance
 
 class GeneticFit():
-    def __init__(self, X, Y, y, max_iter, pop_size, num_generations):
-        self.X = X
-        self.Y = Y
-        self.y = y
+    def __init__(self, trainloader, validationloader, max_iter, pop_size, num_generations):
+        self.trainloader = trainloader
+        self.validationloader = validationloader
         self.num_generations = num_generations
         self.max_iter = max_iter
         self.pop_size = pop_size
@@ -15,18 +14,10 @@ class GeneticFit():
         self.gens = 0
     
     def fitness(self, individual, data):
-        model = NeuralNet(individual, max_iter = len(individual)*self.max_iter)
-        model.fitWithSGD(self.X, self.Y)
-        #model.fit(self.X, self.y)
-
-        yhat = model.predict(self.X)
-
-        # fitness defined as 1 - validation error (want to maximize fitness ==> minimize error)
-        fitness = 1 - np.mean(yhat != self.y)
-        print(yhat)
-        print(self.y)
-        print(np.mean(yhat != self.y))
-        print("Performance of", self.seen, " is ", 1 - fitness)
+        model = NeuralNet(individual)
+        train(model, self.trainloader)
+        
+        fitness = computePerfomance(model, self.Xvalid)
 
         self.seen += 1
         if (self.seen == self.pop_size):
