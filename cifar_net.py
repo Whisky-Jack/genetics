@@ -14,7 +14,7 @@ import numpy as np
 # DEFAULT CONSTRUCTOR
 class DefaultNet(nn.Module):
     def __init__(self):
-        super(self).__init__()
+        super(DefaultNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 20, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(20, 30, 5)
@@ -32,9 +32,9 @@ class DefaultNet(nn.Module):
         return x
 
 # CUSTOM CONSTRUCTOR
-class NeuralNet(nn.Module):
+class Net(nn.Module):
     def __init__(self, layers):
-        super(self).__init__()
+        super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 20, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(20, 30, 5)

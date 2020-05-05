@@ -1,7 +1,7 @@
 from pyeasyga import pyeasyga
 import numpy as np
 import random
-from cifar_net import NeuralNet, train, computePerformance
+from cifar_net import Net, train, computePerformance
 
 class GeneticFit():
     def __init__(self, trainloader, validationloader, max_iter, pop_size, num_generations):
@@ -14,7 +14,7 @@ class GeneticFit():
         self.gens = 0
     
     def fitness(self, individual, data):
-        model = NeuralNet(individual)
+        model = Net(individual)
         train(model, self.trainloader)
         
         fitness = computePerformance(model, self.validationloader)
@@ -80,7 +80,7 @@ class GeneticFit():
 
         print("Best individual is: ")
         print(ga.best_individual()[1])
-        print(self.fitness(ga.best_individual()[1], self.X))
+        #print(self.fitness(ga.best_individual()[1], self.X))
         return ga.best_individual()
 
     
