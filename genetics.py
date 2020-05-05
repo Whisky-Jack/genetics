@@ -4,18 +4,19 @@ import random
 from cifar_net import Net, train, computePerformance
 
 class GeneticFit():
-    def __init__(self, trainloader, validationloader, max_iter, pop_size, num_generations):
+    def __init__(self, trainloader, validationloader, num_epochs, max_iter, pop_size, num_generations):
         self.trainloader = trainloader
         self.validationloader = validationloader
-        self.num_generations = num_generations
+        self.num_epochs = num_epochs
         self.max_iter = max_iter
         self.pop_size = pop_size
+        self.num_generations = num_generations
         self.seen = 0
         self.gens = 0
     
     def fitness(self, individual, data):
         model = Net(individual)
-        train(model, self.trainloader)
+        train(model, self.trainloader, self.num_epochs)
         
         fitness = computePerformance(model, self.validationloader)
 

@@ -65,9 +65,7 @@ class Net(nn.Module):
 #######################################
 
 # train the neural net
-def train(net, trainloader, save = False):
-    # define parameters
-    num_epochs = 1
+def train(net, trainloader, num_epochs, save = False):
 
     # define the loss
     criterion = nn.CrossEntropyLoss()
