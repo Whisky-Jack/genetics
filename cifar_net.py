@@ -118,5 +118,5 @@ def computePerformance(net, dataloader):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = ( correct / total)
-    print('Accuracy of the network on the 10000 test images: %d %%' % accuracy)
+    print('Accuracy of the network on the 10000 test images: ', accuracy)
     return accuracy
