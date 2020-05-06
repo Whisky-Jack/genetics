@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
 #######################################
 # CONSTRUCTION
 #######################################
@@ -66,6 +68,7 @@ class Net(nn.Module):
 
 # train the neural net
 def train(net, trainloader, num_epochs, save = False):
+    net = net.to(device)
 
     # define the loss
     criterion = nn.CrossEntropyLoss()
@@ -76,7 +79,7 @@ def train(net, trainloader, num_epochs, save = False):
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
             # get the inputs; data is a list of [inputs, labels]
-            inputs, labels = data
+            inputs, labels = data[0].to(device), data[1].to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -112,7 +115,7 @@ def computePerformance(net, dataloader):
     total = 0
     with torch.no_grad():
         for data in dataloader:
-            images, labels = data
+            images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
