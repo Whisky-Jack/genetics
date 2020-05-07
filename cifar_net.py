@@ -89,19 +89,26 @@ class Net(nn.Module):
 
         new_layers.insert(layer_index, layer_size)
         fcs = self.fcs
-
-        old_layer = self.fcs[layer_index]
         
+        old_layer = self.fcs[layer_index]
         weight_value = old_layer.weight.data
-        init_weights = weight_value
-
-        new_layer = thing
-        self.fcs[layer_index] = new_layer
 
         if (layer_index > 0 ):
-            nn.Linear(layers[layer_index - 1], layers[layer_index])
+            init_weights = weight_value
+            new_layer = nn.Linear(layers[layer_index - 1], layers[layer_index])
+
+            print(type(new_layer))
+            
+            new_layer_data = new_layer.weight.data
+
+            new_layer_data[:2, :4] = 5
+
+            self.fcs[layer_index] = new_layer
+        
         if (layer_index < len(new_layers) - 1):
             nn.Linear(layers[layer_index], layers[layer_index + 1])
+
+        
 
 
     def remove_layer(self):
@@ -116,6 +123,19 @@ class Net(nn.Module):
     
         layer_dimension_change = random.randint( 1 - new_layers[layer_index], new_layers[layer_index] - 1)
         new_layers[layer_index] += layer_dimension_change
+
+        old_layer = self.fcs[layer_index]
+        
+        weight_value = old_layer.weight.data
+        init_weights = weight_value
+
+        new_layer = thing
+        self.fcs[layer_index] = new_layer
+
+        if (layer_index > 0 ):
+            nn.Linear(layers[layer_index - 1], layers[layer_index])
+        if (layer_index < len(new_layers) - 1):
+            nn.Linear(layers[layer_index], layers[layer_index + 1])
         
         print("fat")
     
