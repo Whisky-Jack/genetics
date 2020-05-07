@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-
+import random
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -37,6 +37,7 @@ class DefaultNet(nn.Module):
 class Net(nn.Module):
     def __init__(self, layers):
         super(Net, self).__init__()
+        self.layers = layers
         self.conv1 = nn.Conv2d(3, 20, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(20, 30, 5)
@@ -48,6 +49,7 @@ class Net(nn.Module):
         fcs = []
         for i in range(len(layers) - 1):
             fcs.append(nn.Linear(layers[i], layers[i + 1]))
+            print(self.fcs[i].weight.data)
         
         self.fcs = fcs
 
@@ -61,7 +63,63 @@ class Net(nn.Module):
         final_layer = self.fcs[-1]
         x = final_layer(x)
         return x
+    
+    def adopt_new_layout(self, new_layers):
+        switch = random.randint(0, 1)
+        if (switch == 0):
+            switch = random.randint(0, 1)
+            if (switch == 0):
+                add_layer()
+            else:
+                if (len(new_layers) > 1):
+                    remove_layer()
+        else:
+            mutate_layer_size()
+        
+        # This fucks up two layers
+        # The layers between the layer before and after the index
 
+        # surgically update fcs
+    
+    def add_layer(self):
+        new_layers = self.layers
+
+        layer_index = random.randrange(len(new_layers))
+        layer_size = random.randint(1, 11)*10
+
+        new_layers.insert(layer_index, layer_size)
+        fcs = self.fcs
+
+        old_layer = self.fcs[layer_index]
+        
+        weight_value = old_layer.weight.data
+        init_weights = weight_value
+
+        new_layer = thing
+        self.fcs[layer_index] = new_layer
+
+        if (layer_index > 0 ):
+            nn.Linear(layers[layer_index - 1], layers[layer_index])
+        if (layer_index < len(new_layers) - 1):
+            nn.Linear(layers[layer_index], layers[layer_index + 1])
+
+
+    def remove_layer(self):
+        new_layers = self.layers
+        layer_index = random.randrange(len(new_layers))
+
+        del(new_layers[layer_index])
+    
+    def mutate_layer_size(self):
+        new_layers = self.layers
+        layer_index = random.randrange(len(new_layers))
+    
+        layer_dimension_change = random.randint( 1 - new_layers[layer_index], new_layers[layer_index] - 1)
+        new_layers[layer_index] += layer_dimension_change
+        
+        print("fat")
+    
+    def reshape_layer(self, )
 #######################################
 # TRAINING
 #######################################
