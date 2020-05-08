@@ -49,7 +49,6 @@ class Net(nn.Module):
         fcs = []
         for i in range(len(layers) - 1):
             fcs.append(nn.Linear(layers[i], layers[i + 1]))
-            print(self.fcs[i].weight.data)
         
         self.fcs = fcs
     
@@ -67,7 +66,6 @@ class Net(nn.Module):
         fcs = []
         for i in range(len(layers) - 1):
             fcs.append(nn.Linear(layers[i], layers[i + 1]))
-            print(self.fcs[i].weight.data)
         
         self.fcs = fcs
 
@@ -87,12 +85,12 @@ class Net(nn.Module):
         if (switch == 0):
             switch = random.randint(0, 1)
             if (switch == 0):
-                add_layer()
+                self.add_layer()
             else:
                 if (len(self.layers) > 1):
-                    remove_layer()
+                    self.remove_layer()
         else:
-            mutate_layer_size()
+            self.mutate_layer_size()
     
     def add_layer(self):
         new_layers = self.layers

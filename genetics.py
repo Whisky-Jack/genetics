@@ -55,12 +55,11 @@ class GeneticFit():
     def geneticFit(self, pretrained = False):
         data = self.trainloader
 
-
         print("Training default network")
         # ifnotdef, train model, else use pretrained model
         net = DefaultNet()
-        train(net, trainloader, num_epochs=2)
-        computePerformance(net, self.testloader)
+        train(net, self.trainloader, num_epochs=1)
+        computePerformance(net, self.validationloader)
         print("Base training complete")
         data = [net]
 
