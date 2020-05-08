@@ -43,12 +43,13 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 30, 5)
 
         # initialize layers from input
-        layers.insert(0, 30 * 5 * 5)
-        layers.insert(len(layers), 10)
+        full_layers = layers.copy()
+        full_layers.insert(0, 30 * 5 * 5)
+        full_layers.insert(len(layers) + 1, 10)
 
         fcs = []
-        for i in range(len(layers) - 1):
-            fcs.append(nn.Linear(layers[i], layers[i + 1]))
+        for i in range(len(full_layers) - 1):
+            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]))
         
         self.fcs = fcs
     
@@ -60,12 +61,13 @@ class Net(nn.Module):
         self.conv2 = cifar_model.conv2
 
         # initialize layers from input
-        layers.insert(0, 30 * 5 * 5)
-        layers.insert(len(layers), 10)
+        full_layers = layers.copy()
+        full_layers.insert(0, 30 * 5 * 5)
+        full_layers.insert(len(layers) + 1, 10)
 
         fcs = []
-        for i in range(len(layers) - 1):
-            fcs.append(nn.Linear(layers[i], layers[i + 1]))
+        for i in range(len(full_layers) - 1):
+            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]))
         
         self.fcs = fcs
 
@@ -81,6 +83,8 @@ class Net(nn.Module):
         return x
     
     def mutate_layout(self):
+        self.add_layer()
+        """
         switch = random.randint(0, 1)
         if (switch == 0):
             switch = random.randint(0, 1)
@@ -91,26 +95,81 @@ class Net(nn.Module):
                     self.remove_layer()
         else:
             self.mutate_layer_size()
+        """
     
     def add_layer(self):
-        new_layers = self.layers
+        new_layers = self.layers.copy()
 
         layer_index = random.randrange(len(new_layers))
         layer_size = random.randint(1, 11)*10
 
+        #new_layers.insert(layer_index, layer_size)
+
+        new_layers.insert(0, 30 * 5 * 5)
+        new_layers.insert(len(new_layers) + 1, 10)
+
         fcs = self.fcs
+
+        # LAYERS [10, 30]
+        # OLD_FULL_LAYERS [750, 10, 30, 10]
+        # OLD_FCS [(750, 10), *(10, 30)*, (30, 10)]
+
+        # INDEX = 1
+        # NEW_LAYERS [10, 20, 30]
+        # NEW_FULL_LAYERS [750, 10, 20, 30, 10]
+        # NEW_FCS [(750, 10), *(10, 20)*, (20, 30), (30, 10)]
+        # layer index i corresponds to fcs index i and i + 1
         
         # INITIALIZE BEFORE LAYER
         # Don't forget about biases
         old_layer = self.fcs[layer_index]
         old_layer_data = old_layer.weight.data
-        new_layer = nn.Linear(layers[layer_index - 1], layers[layer_index])
-
-        print(type(new_layer))
+        new_layer = nn.Linear(new_layers[layer_index], layer_size) #new_layers[layer_index + 1])
         
         new_layer_data = new_layer.weight.data
 
         sizes = [old_layer_data.shape[0], new_layer_data.shape[0]]
+
+        # Finds the smaller layer
+        min_size, min_arg = min((val, idx) for (idx, val) in enumerate(sizes))
+        opposite_arg = not min_arg
+
+        # Obtains random sample of indices to include
+        indices_to_copy = random.sample(range(sizes[opposite_arg]), min_size)
+
+
+        print("new layers is ", new_layers)
+        print("Connecting from ", new_layers[layer_index], "to ", layer_size)
+        print("New layer size is ", layer_size)
+        print("New layer index is ", layer_index)
+        fuck = self.layers.copy()
+        fuck.insert(layer_index, layer_size)
+        fuck.insert(0, 30 * 5 * 5)
+        fuck.insert(len(new_layers) + 1, 10)
+        print("New layers will be", fuck)
+        print("fcs: ", self.fcs)
+        print("Shapes: ", old_layer_data.shape, new_layer_data.shape)
+        print("Min size is: ", min_size)
+        print("Indices to copy: ", len(indices_to_copy))
+    
+        if (opposite_arg):  # If old layer is smaller
+            # Populate random indices of new layer with old layer indices
+            new_layer.weight.data[indices_to_copy, :] = old_layer.weight.data[:, :]
+        else:          # New layer is smaller
+            # Populate new layer with random sample of indices of old layer
+            new_layer.weight.data[:, :] = old_layer.weight.data[indices_to_copy, :]
+
+        self.fcs.insert(layer_index, new_layer)
+        print(self.fcs)
+        
+        # INITIALIZE OLD LAYER
+        old_layer = self.fcs[layer_index + 1]
+        old_layer_data = old_layer.weight.data
+
+        new_layer = nn.Linear(new_layers[layer_index], new_layers[layer_index + 1])
+        new_layer_data = new_layer.weight.data
+
+        sizes = [old_layer_data.shape[1], new_layer_data.shape[1]]
 
         # Finds the smaller layer
         min_size, min_arg = min((val, idx) for (idx, val) in enumerate(sizes))
@@ -126,43 +185,21 @@ class Net(nn.Module):
             # Populate new layer with random sample of indices of old layer
             new_layer.weight.data[:, :] = old_layer.weight.data[indices_to_copy, :]
 
-        self.fcs[layer_index] = new_layer
-        
-        # INITIALIZE OLD LAYER
-        old_layer = self.fcs[layer_index + 1]
-        old_layer_data = old_layer.weight.data
+        self.fcs.insert(layer_index, new_layer)
+        print(self.fcs)
 
-        new_layer = nn.Linear(layers[layer_index], layers[layer_index + 1])
-        new_layer_data = new_layer.weight.data
-
-        sizes = [old_layer_data.shape[1], new_layer_data.shape[1]]
-
-        # Finds the smaller layer
-        min_size, min_arg = min((val, idx) for (idx, val) in enumerate(sizes))
-        opposite_arg = not min_arg
-
-        # Obtains random sample of indices to include
-        indices_to_copy = random.sample(range(sizes[opposite_arg]), min_size)
-
-        if (min_arg):  # If old layer is smaller
-            # Populate random indices of new layer with old layer indices
-            new_layer.weight.data[:, indices_to_copy] = old_layer.weight.data[:, :]
-        else:          # New layer is smaller
-            # Populate new layer with random sample of indices of old layer
-            new_layer.weight.data[:, :] = old_layer.weight.data[:, indices_to_copy]
-
-        self.fcs[layer_index + 1] = new_layer
         new_layers.insert(layer_index, layer_size)
+
 
     def remove_layer(self):
         new_layers = self.layers
         layer_index = random.randrange(len(new_layers))
 
-        new_layer = nn.Linear(layers[layer_index - 1], layers[layer_index + 1])
+        new_layer = nn.Linear(new_layers[layer_index - 1], new_layers[layer_index + 1])
         new_layer_data = new_layer.weight.data
 
         # Populate new layer with random weights from old layers
-        before_layer_data = self.fcs[layer_index - 1].weight.data
+        before_layer_data = self.fcs[layer_index].weight.data
         after_layer_data = self.fcs[layer_index + 1].weight.data
 
         input_sizes = [before_layer_data.shape[0], new_layer_data.shape[0]]
@@ -196,11 +233,11 @@ class Net(nn.Module):
         init_weights = weight_value
 
         # Get relevant layers
-        before_layer_data = self.fcs[layer_index - 1].weight.data
+        before_layer_data = self.fcs[layer_index].weight.data
         after_layer_data = self.fcs[layer_index + 1].weight.data
 
         # INITIALIZE INPUTS
-        new_layer = nn.Linear(layers[layer_index - 1], layers[layer_index])
+        new_layer = nn.Linear(new_layers[layer_index - 1], new_layers[layer_index])
 
         input_sizes = [before_layer_data.shape[0], new_layer.weight.data.shape[0]]
 
@@ -218,7 +255,7 @@ class Net(nn.Module):
             new_layer.weight.data[:, :] = before_layer_data.weight.data[:, indices_to_copy]
 
         # INITIALIZE OUTPUTS
-        new_layer = nn.Linear(layers[layer_index], layers[layer_index + 1])
+        new_layer = nn.Linear(new_layers[layer_index], new_layers[layer_index + 1])
 
         input_sizes = [after_layer_data.shape[0], new_layer.weight.data.shape[0]]
 
