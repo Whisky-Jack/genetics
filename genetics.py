@@ -35,7 +35,8 @@ class GeneticFit():
         layers = [random.randint(1, 11)*10 for i in range(num_layers)]
         print("layer dimensions are", layers)
 
-        individual = Net(layers)
+        # individual = Net(layers)
+        individual = Net(layers, data[0])
         return individual
     
     def mutate(self, individual):
@@ -58,9 +59,10 @@ class GeneticFit():
         print("Training default network")
         # ifnotdef, train model, else use pretrained model
         net = DefaultNet()
-        train(net, trainloader, num_epochs=100)
-        computePerformance(net, testloader)
+        train(net, trainloader, num_epochs=2)
+        computePerformance(net, self.testloader)
         print("Base training complete")
+        data = [net]
 
         ga = pyeasyga.GeneticAlgorithm(data,
                                population_size=self.pop_size,
