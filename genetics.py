@@ -2,6 +2,7 @@ from pyeasyga import pyeasyga
 import numpy as np
 import random
 from cifar_net import DefaultNet, Net, train, computePerformance
+import torch
 
 class GeneticFit():
     def __init__(self, trainloader, validationloader, num_epochs, max_iter, pop_size, num_generations):
@@ -58,9 +59,17 @@ class GeneticFit():
         data = self.trainloader
 
         print("Training default network")
-        # ifnotdef, train model, else use pretrained model
+
+        PATH = './cifar_net.pth'
         net = DefaultNet()
-        train(net, self.trainloader, num_epochs=50)
+
+        # ifnotdef, train model, else use pretrained model
+        if (not pretrained):
+            train(net, self.trainloader, num_epochs=50)
+            torch.save(net.state_dict(), PATH)
+        else:   #load model back in
+            net.load_state_dict(torch.load(PATH))
+        
         computePerformance(net, self.validationloader)
         print("Base training complete")
         data = [net]
