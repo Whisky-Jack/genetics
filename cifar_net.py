@@ -83,8 +83,6 @@ class Net(nn.Module):
         return x
     
     def mutate_layout(self):
-        self.mutate_layer_size()
-        """
         switch = random.randint(0, 1)
         if (switch == 0):
             switch = random.randint(0, 1)
@@ -95,7 +93,6 @@ class Net(nn.Module):
                     self.remove_layer()
         else:
             self.mutate_layer_size()
-        """
     
     def add_layer(self):
         # LAYERS [10, 30]

@@ -45,12 +45,14 @@ class GeneticFit():
     
     def crossover(self, parent_1, parent_2):
         # get index of shorter parent to ensure crossover can occur
+        """
         min_parent_size = np.min([len(parent_1), len(parent_2)])
         crossover_index = random.randint(1, min_parent_size)
 
         child_1_layers = parent_1[:crossover_index] + parent_2[crossover_index:]
         child_2_layers = parent_2[:crossover_index] + parent_1[crossover_index:]
-        return child_1, child_2
+        """
+        return parent_1, parent_2 #child_1, child_2
     
     def geneticFit(self, pretrained = False):
         data = self.trainloader
@@ -58,7 +60,7 @@ class GeneticFit():
         print("Training default network")
         # ifnotdef, train model, else use pretrained model
         net = DefaultNet()
-        train(net, self.trainloader, num_epochs=1)
+        train(net, self.trainloader, num_epochs=50)
         computePerformance(net, self.validationloader)
         print("Base training complete")
         data = [net]
