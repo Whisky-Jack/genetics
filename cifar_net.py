@@ -83,7 +83,7 @@ class Net(nn.Module):
         return x
     
     def mutate_layout(self):
-        self.remove_layer()
+        self.mutate_layer_size()
         """
         switch = random.randint(0, 1)
         if (switch == 0):
@@ -223,6 +223,7 @@ class Net(nn.Module):
         # Obtains random sample of indices to include
         indices_to_copy = random.sample(range(input_sizes[opposite_arg]), min_size)
 
+        """
         print("new layers is ", new_layers)
         print("New layer index is ", layer_index)
         fuck = self.layers.copy()
@@ -233,6 +234,7 @@ class Net(nn.Module):
         print("Shapes: ", before_layer_data.shape, new_layer_data.shape)
         print("Min size is: ", min_size)
         print("Indices to copy: ", len(indices_to_copy))
+        """
 
         if (opposite_arg):  # If old layer is smaller
             # Populate random indices of new layer with old layer indices
@@ -250,56 +252,67 @@ class Net(nn.Module):
         print("fcs: ", self.fcs)
     
     def mutate_layer_size(self):
-        new_layers = self.layers
+        # NEW_LAYERS [10, 20, 30]
+        # NEW_FULL_LAYERS [750, 10, 20, 30, 10]
+        # NEW_FCS [(750, 10), *(10, 20)*, *(20, 30)*, (30, 10)]
+        # layer index i corresponds to fcs index i and i + 1
+
+        # INDEX = 1
+        # NEW_LAYERS [10, 40, 30]
+        # NEW_FULL_LAYERS [750, 10, 40, 30, 10]
+        # NEW_FCS [(750, 10), *(10, 40)*, *(40, 30)*, (30, 10)]
+
+        new_layers = self.layers.copy()
         layer_index = random.randrange(len(new_layers))
     
         layer_dimension_change = random.randint( 1 - new_layers[layer_index], new_layers[layer_index] - 1)
-        new_layers[layer_index] += layer_dimension_change
+        new_layer_size = new_layers[layer_index] + layer_dimension_change
 
-        old_layer = self.fcs[layer_index]
-        
-        weight_value = old_layer.weight.data
-        init_weights = weight_value
+        new_layers.insert(0, 30 * 5 * 5)
+        new_layers.insert(len(new_layers) + 1, 10)
 
         # Get relevant layers
         before_layer_data = self.fcs[layer_index].weight.data
         after_layer_data = self.fcs[layer_index + 1].weight.data
 
-        # INITIALIZE INPUTS
-        new_layer = nn.Linear(new_layers[layer_index - 1], new_layers[layer_index])
+        # INITIALIZE LAYERS
+        new_before_layer = nn.Linear(new_layers[layer_index], new_layer_size)
+        new_after_layer = nn.Linear(new_layer_size, new_layers[layer_index + 2])
 
-        input_sizes = [before_layer_data.shape[0], new_layer.weight.data.shape[0]]
-
-        min_size, min_arg = min((val, idx) for (idx, val) in enumerate(input_sizes))
-        opposite_arg = not min_arg
-
-        # Obtains random sample of indices to include
-        indices_to_copy = range(input_sizes[opposite_arg])
-
-        if (min_arg):  # If old layer is smaller
-            # Populate random indices of new layer with old layer indices
-            new_layer.weight.data[:, indices_to_copy] = before_layer_data.weight.data[:, :]
-        else:          # New layer is smaller
-            # Populate new layer with random sample of indices of old layer
-            new_layer.weight.data[:, :] = before_layer_data.weight.data[:, indices_to_copy]
-
-        # INITIALIZE OUTPUTS
-        new_layer = nn.Linear(new_layers[layer_index], new_layers[layer_index + 1])
-
-        input_sizes = [after_layer_data.shape[0], new_layer.weight.data.shape[0]]
+        input_sizes = [before_layer_data.shape[0], new_before_layer.weight.data.shape[0]]
 
         min_size, min_arg = min((val, idx) for (idx, val) in enumerate(input_sizes))
         opposite_arg = not min_arg
 
         # Obtains random sample of indices to include
-        indices_to_copy = range(input_sizes[opposite_arg])
+        indices_to_copy = random.sample(range(input_sizes[opposite_arg]), min_size)
 
-        if (min_arg):  # If old layer is smaller
+        """
+        print("new layers is ", new_layers)
+        print("New layer index is ", layer_index)
+        print("New layer size is ", new_layer_size)
+        fuck = self.layers.copy()
+        fuck[layer_index] = new_layer_size
+        fuck.insert(0, 30 * 5 * 5)
+        fuck.insert(len(new_layers) + 1, 10)
+        print("New layers will be", fuck)
+        print("fcs: ", self.fcs)
+        print("Shapes: ", before_layer_data.shape, new_before_layer.weight.data.shape)
+        print("Min size is: ", min_size)
+        print("Indices to copy: ", len(indices_to_copy))
+        """
+
+        if (opposite_arg):  # If old layer is smaller
             # Populate random indices of new layer with old layer indices
-            new_layer.weight.data[:, indices_to_copy] = after_layer_data.weight.data[:, :]
+            new_before_layer.weight.data[indices_to_copy, :] = before_layer_data[:, :]
+            new_after_layer.weight.data[:, indices_to_copy] = after_layer_data[:, :]
         else:          # New layer is smaller
             # Populate new layer with random sample of indices of old layer
-            new_layer.weight.data[:, :] = after_layer_data.weight.data[:, indices_to_copy]
+            new_before_layer.weight.data[:, :] = before_layer_data[indices_to_copy, :]
+            new_after_layer.weight.data[:, :] = after_layer_data[:, indices_to_copy]
+        
+        self.fcs[layer_index] = new_before_layer
+        self.fcs[layer_index + 1] = new_after_layer
     
     def reshape_layer(self):
         print("Not implemented")
