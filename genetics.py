@@ -16,6 +16,7 @@ class GeneticFit():
         self.gens = 0
     
     def fitness(self, individual, data):
+        print("Net has dimensions ", individual.layers)
         train(individual, self.trainloader, self.num_epochs)
         
         fitness = computePerformance(individual, self.validationloader)
