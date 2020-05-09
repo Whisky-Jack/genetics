@@ -83,7 +83,7 @@ class Net(nn.Module):
         return x
     
     def mutate_layout(self):
-        self.add_layer()
+        self.remove_layer()
         """
         switch = random.randint(0, 1)
         if (switch == 0):
@@ -191,10 +191,24 @@ class Net(nn.Module):
 
 
     def remove_layer(self):
-        new_layers = self.layers
+        # NEW_LAYERS [10, 20, 30]
+        # NEW_FULL_LAYERS [750, 10, 20, 30, 10]
+        # NEW_FCS [(750, 10), *(10, 20)*, *(20, 30)*, (30, 10)]
+        # layer index i corresponds to fcs index i and i + 1
+
+        # INDEX = 1
+        # LAYERS [10, 30]
+        # OLD_FULL_LAYERS [750, 10, 30, 10]
+        # OLD_FCS [(750, 10), *(10, 30)*, (30, 10)]
+
+
+        new_layers = self.layers.copy()
         layer_index = random.randrange(len(new_layers))
 
-        new_layer = nn.Linear(new_layers[layer_index - 1], new_layers[layer_index + 1])
+        new_layers.insert(0, 30 * 5 * 5)
+        new_layers.insert(len(new_layers) + 1, 10)
+
+        new_layer = nn.Linear(new_layers[layer_index], new_layers[layer_index + 2])
         new_layer_data = new_layer.weight.data
 
         # Populate new layer with random weights from old layers
@@ -209,15 +223,31 @@ class Net(nn.Module):
         # Obtains random sample of indices to include
         indices_to_copy = random.sample(range(input_sizes[opposite_arg]), min_size)
 
-        if (min_arg):  # If old layer is smaller
+        print("new layers is ", new_layers)
+        print("New layer index is ", layer_index)
+        fuck = self.layers.copy()
+        fuck.insert(0, 30 * 5 * 5)
+        fuck.insert(len(new_layers) + 1, 10)
+        print("New layers will be", fuck)
+        print("fcs: ", self.fcs)
+        print("Shapes: ", before_layer_data.shape, new_layer_data.shape)
+        print("Min size is: ", min_size)
+        print("Indices to copy: ", len(indices_to_copy))
+
+        if (opposite_arg):  # If old layer is smaller
             # Populate random indices of new layer with old layer indices
-            new_layer.weight.data[:, indices_to_copy] = before_layer_data.weight.data[:, :]
+            new_layer.weight.data[indices_to_copy, :] = before_layer_data[:, :]
         else:          # New layer is smaller
             # Populate new layer with random sample of indices of old layer
-            new_layer.weight.data[:, :] = before_layer_data.weight.data[:, indices_to_copy]
+            new_layer.weight.data[:, :] = before_layer_data[indices_to_copy, :]
         
+
+        #definitely wrong
+        print("fcs: ", self.fcs)
+        del(self.fcs[layer_index + 1])
+        print("fcs: ", self.fcs)
         self.fcs[layer_index] = new_layer
-        del(new_layers[layer_index])
+        print("fcs: ", self.fcs)
     
     def mutate_layer_size(self):
         new_layers = self.layers
