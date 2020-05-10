@@ -314,7 +314,7 @@ class Net(nn.Module):
 #######################################
 
 # train the neural net
-def train(net, trainloader, num_epochs, save = False):
+def train(net, trainloader, num_epochs, save = False, verbose = False):
     net.to(device)
 
     # define the loss
@@ -339,7 +339,7 @@ def train(net, trainloader, num_epochs, save = False):
 
             # print statistics
             running_loss += loss.item()
-            if i % 2000 == 1999:    # print every 2000 mini-batches
+            if (i % 2000 == 1999 and verbose == True):    # print every 2000 mini-batches
                 print('[%d, %5d] loss: %.3f' %
                     (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
