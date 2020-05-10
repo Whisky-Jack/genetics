@@ -17,6 +17,7 @@ class GeneticFit():
         self.gens = 0
     
     def fitness(self, individual, data):
+        print("####################")
         print("Net has dimensions: ", individual.layers)
         train(individual, self.trainloader, self.num_epochs)
         
@@ -26,6 +27,7 @@ class GeneticFit():
         
         if (self.seen == self.pop_size):
             self.gens += 1
+            print("###############################################################")
             print("Generation ", self.gens, " complete")
             print("###############################################################")
             self.seen = 0
@@ -92,8 +94,13 @@ class GeneticFit():
         ga.run()
 
         print("Best individual is: ")
-        print(ga.best_individual()[1])
-        #print(self.fitness(ga.best_individual()[1], self.X))
+        print(ga.best_individual()[1].layers)
+        print("With performance: ", computePerformance(ga.best_individual()[1], self.validationloader))
+        print("Saving model...")
+
+        BEST_PATH = './best_model.pth'
+        torch.save(ga.best_individual()[1].state_dict(), BEST_PATH)
+
         return ga.best_individual()
 
     
