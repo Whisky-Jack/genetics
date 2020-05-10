@@ -319,7 +319,8 @@ def train(net, trainloader, num_epochs, save = False, verbose = True):
 
     # define the loss
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    #optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.Adam(net.parameters(), lr=0.001)
 
     # loop over the training set
     for epoch in range(num_epochs):  
