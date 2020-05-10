@@ -111,6 +111,7 @@ def train(net, trainloader, num_epochs, save = False):
 #evaluate the network on the test data
 def computePerformance(net, dataloader):
     #evaluate on entire test dataset
+    net = net.to(device)
     correct = 0
     total = 0
     with torch.no_grad():
