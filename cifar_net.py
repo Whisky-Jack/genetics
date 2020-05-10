@@ -314,7 +314,7 @@ class Net(nn.Module):
 #######################################
 
 # train the neural net
-def train(net, trainloader, num_epochs, save = False, verbose = False):
+def train(net, trainloader, num_epochs, save = False, verbose = True):
     net.to(device)
 
     # define the loss
