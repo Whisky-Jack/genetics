@@ -319,7 +319,7 @@ class Net(nn.Module):
 
 # train the neural net
 def train(net, trainloader, num_epochs, save = False):
-    net = net.to(device)
+    net.to(device)
 
     # define the loss
     criterion = nn.CrossEntropyLoss()
