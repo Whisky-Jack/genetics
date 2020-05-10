@@ -49,7 +49,7 @@ class Net(nn.Module):
 
         fcs = []
         for i in range(len(full_layers) - 1):
-            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]))
+            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]).to(device))
         
         self.fcs = fcs
     
@@ -67,7 +67,7 @@ class Net(nn.Module):
 
         fcs = []
         for i in range(len(full_layers) - 1):
-            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]))
+            fcs.append(nn.Linear(full_layers[i], full_layers[i + 1]).to(device))
         
         self.fcs = fcs
 
@@ -241,12 +241,8 @@ class Net(nn.Module):
             new_layer.weight.data[:, :] = before_layer_data[indices_to_copy, :]
         
 
-        #definitely wrong
-        print("fcs: ", self.fcs)
         del(self.fcs[layer_index + 1])
-        print("fcs: ", self.fcs)
         self.fcs[layer_index] = new_layer
-        print("fcs: ", self.fcs)
     
     def mutate_layer_size(self):
         # NEW_LAYERS [10, 20, 30]
@@ -363,7 +359,7 @@ def train(net, trainloader, num_epochs, save = False):
 def computePerformance(net, dataloader):
     #evaluate on entire test dataset
     net.to(device)
-    
+
     correct = 0
     total = 0
     with torch.no_grad():
