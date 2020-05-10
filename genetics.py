@@ -3,6 +3,7 @@ import numpy as np
 import random
 from cifar_net import DefaultNet, Net, train, computePerformance
 import torch
+import os.path
 
 class GeneticFit():
     def __init__(self, trainloader, validationloader, num_epochs, max_iter, pop_size, num_generations):
@@ -65,7 +66,7 @@ class GeneticFit():
         net = DefaultNet()
 
         # ifnotdef, train model, else use pretrained model
-        if (not pretrained):
+        if (not pretrained or (not os.path.isfile(PATH))):
             train(net, self.trainloader, num_epochs=50)
             torch.save(net.state_dict(), PATH)
         else:   #load model back in
