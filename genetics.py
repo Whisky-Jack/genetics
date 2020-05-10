@@ -69,7 +69,7 @@ class GeneticFit():
 
         # ifnotdef, train model, else use pretrained model
         if (not pretrained or (not os.path.isfile(PATH))):
-            train(net, self.trainloader, num_epochs= 25, verbose = True)
+            train(net, self.trainloader, num_epochs= 10, verbose = True)
             torch.save(net.state_dict(), PATH)
         else:   #load model back in
             net.load_state_dict(torch.load(PATH))
